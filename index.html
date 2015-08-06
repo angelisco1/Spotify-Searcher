@@ -7,17 +7,18 @@
 <body>
 	<h1 class="main-title">Spotify Artist Search</h1>
 	<form>
-		<input class="artist" type="text" name="search" placeholder="Artist">
+		<input id="artist" type="text" name="search" placeholder="Artist">
 		<button class="submit-button" type="submit">Search</button>
 	</form>
 	<div class="main-container">
+		
 	</div>
 	<script type="text/javascript">
 		$('.submit-button').click(function(event){
 			$('.main-container').empty();
 			event.preventDefault();
-			console.log($('.artist').val());
-			var dir = "https://api.spotify.com/v1/search?type=artist&query=" + $('.artist').val();
+			console.log($('#artist').val());
+			var dir = "https://api.spotify.com/v1/search?type=artist&query=" + $('#artist').val();
 			var request = $.getJSON(dir, showInfo);
 
 			function showInfo(request){
@@ -26,16 +27,43 @@
 				artists.forEach(function(artist){
 					var info = '<h3>' + artist.name + '</h3>';
 					if(artist.images.length > 0){
-						info += '<img width="400px" src="' + artist.images[0].url + '">'
+						info += '<img width="300px" src="' + artist.images[0].url + '">'
 					}
-					info += '<br><button class="albums-button" id="' + artist.id + '" type="submit">Show album</button><br><div class="albums-container"></div>';
+					info += '<br><hr><button class="albums-button" id="b' + artist.id + '" type="submit">Show album</button><br><div class="albums-container ' + artist.id + '"></div><hr>';
 					$('.main-container').append(info);
 				});
 			}
 			
 		});
 	</script>
+	
+	<script type="text/javascript">
+		$(document).on('click', '.albums-button', function(event){
+			var self = this;
+			$('.albums-container').empty();
+			event.preventDefault();
+			var artistId = self.id.substr(1);
+			console.log("ID... " + artistId);
 
+			//console.log(this.id);
+			var dir = "https://api.spotify.com/v1/artists/" + artistId + "/albums";
+			var request = $.getJSON(dir, showAlbumInfo);
+
+			function showAlbumInfo(request){
+				var albums = request.items;
+
+				console.log(self.id);
+				albums.forEach(function(album){
+					var info = '<h4>' + album.name + '</h4>';
+					if(album.images.length > 0){
+						info += '<img width="200px" src="' + album.images[0].url + '">';
+					}
+					console.log(info);
+					$('.' + artistId).append(info);
+				});
+			}
+		});
+	</script>
 
 </body>
 </html>
