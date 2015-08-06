@@ -3,6 +3,7 @@
 <head>
 	<title>Spotify Artist Search</title>
 	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 </head>
 <body>
 	<h1 class="main-title">Spotify Artist Search</h1>
@@ -10,9 +11,26 @@
 		<input id="artist" type="text" name="search" placeholder="Artist">
 		<button class="submit-button" type="submit">Search</button>
 	</form>
-	<div class="main-container">
-		
+	<div class="main-container"></div>
+
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog" role="document">
+    		<div class="modal-content">
+    			<div class="modal-header">
+        			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+				</div>
+		    	<div class="modal-body">
+		    		<ul class="modal-container-tracks"></ul>
+		   		</div>
+			    <div class="modal-footer">
+			    	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			    </div>
+			</div>
+		</div>
 	</div>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
 	<script type="text/javascript">
 		$('.submit-button').click(function(event){
 			$('.main-container').empty();
@@ -47,16 +65,16 @@
 
 			//console.log(this.id);
 			var dir = "https://api.spotify.com/v1/artists/" + artistId + "/albums";
-			var request = $.getJSON(dir, showAlbumInfo);
+			var request = $.getJSON(dir, showAlbum);
 
-			function showAlbumInfo(request){
+			function showAlbum(request){
 				var albums = request.items;
 
 				console.log(self.id);
 				albums.forEach(function(album){
 					var info = '<h4>' + album.name + '</h4>';
 					if(album.images.length > 0){
-						info += '<img width="200px" src="' + album.images[0].url + '">';
+						info += '<button type="button" class="btn btn-primary btn-lg track-button" data-toggle="modal" data-target="#myModal" id="b' + album.id + '"><img width="200px" src="' + album.images[0].url + '"></button>';
 					}
 					console.log(info);
 					$('.' + artistId).append(info);
@@ -64,6 +82,30 @@
 			}
 		});
 	</script>
+
+	<script type="text/javascript">
+	$(document).on('click', '.track-button', function(event){
+		var self = this;
+		event.preventDefault();
+		var albumId = self.id.substr(1);
+		console.log("Album Id: " + albumId);
+
+		var dir = "https://api.spotify.com/v1/albums/" + albumId + "/tracks";
+		var request = $.getJSON(dir, showTracks);
+		console.log(request);
+		function showTracks(request){
+			var tracks = request.items;
+
+			tracks.forEach(function(track){
+				var trackList = '<li><a href="' + track.preview_url + '" target="_blank">' + track.name + '</a></li>';
+				$('.modal-container-tracks').append(trackList);
+			});
+
+		}
+	});
+
+	</script>
+
 
 </body>
 </html>
